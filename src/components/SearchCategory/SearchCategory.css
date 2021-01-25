@@ -1,0 +1,14 @@
+.search-bar{
+     position: relative;
+     display: flex;
+     flex-direction: column;
+     width: 400px;
+     margin: 50px auto;
+}
+
+.search-bar .search-title{
+     font-size: 20px;
+     font-weight: 600;
+     letter-spacing: 1px;
+     margin-bottom: 5px;
+}
