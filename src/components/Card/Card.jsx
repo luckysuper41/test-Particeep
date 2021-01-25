@@ -4,6 +4,7 @@ import {useDispatch} from 'react-redux';
 import {removeData, changeLikeDislike} from '../../redux/dataSlice';
 
 import Button from "../Button/Button";
+import PropTypes from 'prop-types';
 
 export default function Card(props) {
      const {item} = props;
@@ -87,7 +88,7 @@ export default function Card(props) {
                <div className="card-like-dislike">
                     <div className="ele-like-dislike">
                          <Button
-                              content={<i class="fas fa-thumbs-up"></i>}
+                              content={<i className="fas fa-thumbs-up"></i>}
                               handleClick = {()=>handleLike(item)}
                               className={isLike ? "button-like active":"button-like"}
                               type="button"
@@ -96,7 +97,7 @@ export default function Card(props) {
                     </div>
                     <div className="ele-like-dislike">
                          <Button
-                              content={<i class="fas fa-thumbs-down"></i>}
+                              content={<i className="fas fa-thumbs-down"></i>}
                               handleClick = {()=>handleDislike(item)}
                               className={isDislike ? "button-dislike active":"button-dislike"}
                               type={"button"}
@@ -116,4 +117,12 @@ export default function Card(props) {
                
           </div>
      )
+}
+
+Card.propTypes = {
+     item: PropTypes.object
+};
+
+Card.defaultProps = {
+     item: null
 }

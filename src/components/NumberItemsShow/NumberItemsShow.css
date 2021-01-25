@@ -1,0 +1,29 @@
+.items-show{
+     position: relative;
+     display: flex;
+     flex-direction: row;
+     justify-content: center;
+     align-items: center;
+     margin: 0 auto;
+     margin-bottom: 20px;
+}
+.button-items-show{
+     width: 40px;
+     height: 40px;
+
+     outline: none;
+     border-radius: 4px;
+     border: 1px solid rgb(119, 119, 119);
+     margin-right: 10px;
+     background: rgb(235, 235, 235);
+
+     cursor: pointer;
+     transition: all 0.2s;
+}
+.button-items-show:hover{
+     background: rgb(255, 255, 255);
+}
+
+.button-items-show.active{
+     background: rgb(255, 255, 255);
+}
