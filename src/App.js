@@ -1,103 +1,133 @@
-import React,{Fragment, useState} from 'react';
+import React,{Fragment, useState, useEffect} from 'react';
 import "./App.css";
 import {useSelector} from 'react-redux';
 import SearchCategory from './components/SearchCategory/SearchCategory';
 import Card from "./components/Card/Card";
-import NextPrevious from "./components/NextPrevious/NextPrevious";
-import NumberItemsShow from "./components/NumberItemsShow/NumberItemsShow";
+import Pagination from "./components/Pagination/Pagination";
+import Spinner from "./components/Spinner/Spinner";
+import {useDispatch} from 'react-redux';
+import { movies$ } from "./data/movies";
+
+import {
+  LOADING, 
+  ERROR, 
+  FETCH_DATA, 
+  UPDATE_CATEGORY_LIST, 
+  FILTER_MOVIES, 
+  UPDATE_FILTERED_CATEGORY, 
+  REMOVE_MOVIE,
+  UPDATE_LIKE,
+  UPDATE_DISLIKE
+} from "./redux/dataSlice";
 
 function App() {
+  const dispatch = useDispatch();
+  
+  // hook
+  useEffect(() => {
+    const getData = async () => {
+      dispatch(LOADING());
+      try{
+        const response = await movies$;
+  
+        if(!response || response === 0){
+          return dispatch(ERROR("Not Found"));
+        }
+  
+        response.forEach(movie => {
+          movie.status = 'none'
+        });
+  
+        dispatch(FETCH_DATA(response));
+        dispatch(UPDATE_CATEGORY_LIST());
+        dispatch(FILTER_MOVIES());
+      }catch(error){
+        console.log(error.message);
+        dispatch(ERROR("Get movies error"));
+      }
+    }
+
+    getData();
+    
+  }, [dispatch])
+
   // redux
   const data = useSelector(state => state.data);
 
-  // hook
-  const [searchCategory, setSearchCategory] = useState([]); 
+  const removeMovie = (id) => {
+    dispatch(REMOVE_MOVIE(id));
+    dispatch(UPDATE_CATEGORY_LIST());
+    dispatch(FILTER_MOVIES());
+  }
+
+  const updateFilter = (category) => {
+    dispatch(LOADING());
+    dispatch(UPDATE_FILTERED_CATEGORY(category));
+    dispatch(FILTER_MOVIES());
+  }
+
+  const updateLike = (id) => {
+    dispatch(UPDATE_LIKE(id));
+    dispatch(FILTER_MOVIES());
+  }
+
+  const updateDislike = (id) => {
+    dispatch(UPDATE_DISLIKE(id));
+    dispatch(FILTER_MOVIES())
+  }
 
   // Systeme de pagination
-  let index = 0;
-  const [numberOfItems,setNumberOfItems] = useState(12);
-  const [minPage,setMinPage] = useState(0);
-  const [actualPage,setActualPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [moviesPerPage, setMoviesPerPage] = useState(4)
 
-  //MultiSelect - options
-  const options = [
-    (data.findIndex(element=>element.category === "Comedy") >= 0 ?
-      { label: "Comedy 🎭", value: "Comedy"}
-      :{ label: "Comedy 🎭", value: "Comedy", disabled: true}),
+  // Get current movies
+  const indexOfLastMovie = currentPage * moviesPerPage
+  const indexOfFirstMovie = indexOfLastMovie - moviesPerPage
+  const currentFilteredMovies = data.filteredMovies.slice(indexOfFirstMovie, indexOfLastMovie)
 
-    (data.findIndex(element=>element.category === "Animation") >= 0 ?
-      { label: "Animation 👑", value: "Animation" }:
-      { label: "Animation 👑", value: "Animation", disabled: true }),
+  // Move to next page
+  const pageUp = () => {
+    setCurrentPage(currentPage+1);
+  }
 
-    (data.findIndex(element=>element.category === "Thriller") >= 0 ?
-      { label: "Thriller 👻", value: "Thriller"}:
-      { label: "Thriller 👻", value: "Thriller", disabled: true}),
+  // Move to previous page
+  const pageDown = () => {
+    setCurrentPage(currentPage-1);
+  }
 
-    (data.findIndex(element=>element.category === "Drame") >= 0 ?
-      { label: "Drame 🧛", value: "Drame" }:
-      { label: "Drame 🧛", value: "Drame", disabled: true })
-  ];
-
-  //lengthDataShow
-  const lengthDataShow = data.filter((item_category)=>{
-    if(searchCategory.length === 0){
-      return item_category;
-    }else if(searchCategory.findIndex((element)=>element.value === item_category.category) >= 0){
-      return item_category;
-    }else{
-      return null;
-    }
-  }).length;
+  if (data.loading){
+    return <Spinner />
+  }
 
   return (
     <Fragment>
 
       <SearchCategory 
-        options={options} 
-        value={searchCategory} 
-        onChange={setSearchCategory} 
+        categories={data.categories} 
+        update={updateFilter}
       />
 
-      <NumberItemsShow 
-        numberOfItems={numberOfItems}
-        setNumberOfItems={setNumberOfItems} 
-        setMinPage={setMinPage}
-        setActualPage={setActualPage}
+      <Pagination 
+        totalMovies={data.filteredMovies.length}
+        indexOfFirstMovie={indexOfFirstMovie}
+        indexOfLastMovie={indexOfLastMovie}
+        currentPage={currentPage}
+        pageUp={pageUp}
+        pageDown={pageDown}
+        changeMoviesPerPage={setMoviesPerPage} 
       />
 
       <div className="list-card">
-        {data.filter((item_category)=>{
-          if(searchCategory.length === 0){
-            return item_category;
-          }else if(searchCategory.findIndex((element)=>element.value === item_category.category) >= 0){
-            return item_category;
-          }else{
-            return null;
-          }
-        }).filter((item_page)=>{
-          index++;
-          if(minPage + numberOfItems >= index && index > minPage){
-            return item_page;
-          }else{
-            return null;
-          }
-        }).map( (item) => (
-          <div key={item.id} className="card-element">
+        {currentFilteredMovies.map( (item) => (
             <Card 
+              key={item.id}
               item={item} 
+              remove ={removeMovie}
+              updateLike={updateLike}
+              updateDislike={updateDislike}
             />
-          </div>
         ))}
       </div>
-      
-      <NextPrevious 
-        minPage={minPage}
-        setMinPage={setMinPage}
-        actualPage={actualPage}
-        setActualPage={setActualPage}
-        numberOfItems={numberOfItems}
-        maxPage={Math.ceil(lengthDataShow/numberOfItems)}
-      />
       
     </Fragment>
   );

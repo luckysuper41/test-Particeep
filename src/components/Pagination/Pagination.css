@@ -1,4 +1,4 @@
-.items-show{
+.Pagination{
      position: relative;
      display: flex;
      flex-direction: row;
@@ -7,7 +7,7 @@
      margin: 0 auto;
      margin-bottom: 20px;
 }
-.button-items-show{
+.Select-numberItem{
      width: 40px;
      height: 40px;
 
@@ -20,10 +20,14 @@
      cursor: pointer;
      transition: all 0.2s;
 }
-.button-items-show:hover{
-     background: rgb(255, 255, 255);
+.Detail{
+     font-size: 14px;
+     margin: 0 5px;
 }
-
-.button-items-show.active{
-     background: rgb(255, 255, 255);
+.Button-page{
+     outline: none;
+     border: none;
+     font-size: 30px;
+     margin: 0 3px;
+     cursor: pointer;
 }
